@@ -1,0 +1,447 @@
+{% extends 'explore/base.html' %}
+{% load static %}
+{% block content %}
+<section id="store-products">
+    <div id="store-departments">
+        <ul class='slider owl-carousel'>
+            <li><a href="#">Popular</a></li>
+            <li><a href="#">Milk, Dairy & Eggs</a></li>
+            <!-- session.run('Match (n) where n.department contains "link" limit 20') -->
+            <!-- address = neo4j/query -->
+            <li><a href="#">Fruits & Vegetables</a></li>
+            <li><a href="#">Meat, Poultry & Fish</a></li>
+            <li><a href="#">Bread, Bakery & Deserts</a></li>
+            <li><a href="#">Frozen Food</a></li>
+            <li><a href="#">Food Cupboard</a></li>
+            <li><a href="#">Snacks & Sweets</a></li>
+            <li><a href="#">Deli</a></li>
+            <li><a href="#">Beverages & Juices</a></li>
+        </ul>
+        <form action="#" method="get" id="shop-searchbar" >
+            <div class="search-btn"></div>
+            <input class='search-txt' type="search" name="search" >
+            <div class="filters-btn"></div>
+            <!-- <button class='search-btn' type="submit" id="search-btn"></button> -->
+        </form>
+    </div>
+    
+</section>    
+
+<!-- <section id="current-item">
+    <div id="item-image">
+        <img src="{% static 'explore/art.jpg' %}" alt="">
+    </div>
+    <div id="item-details">
+            <div id="item-desc">
+                <h1>Current Item</h1>
+                <p id="desc">this is a description of the current item. this is a description of the current item. this is a description of the current item.</p>
+                <h3>ZAR 100.00</h3>
+                <p style="text-align: center;">+    [1]    -</p>
+                <p style="text-align: center;
+                        background: black;
+                        color: white;
+                        border-radius: 3px;
+                        height: 20px;
+                        padding: 10px 0;">
+                    ADD TO CART
+                </p>
+            </div>
+
+            <div id="alternatives">
+                <ul>
+                    <li><img src="{% static 'explore/art.jpg' %}" alt=""></li>
+                    <li><img src="{% static 'explore/art.jpg' %}" alt=""></li>
+                    <li><img src="{% static 'explore/art.jpg' %}" alt=""></li>
+                </ul>
+                <p>working hours</p>
+            </div>
+    </div>
+</section>
+    
+    <div id="department-inventory">
+        <ul>
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 1
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 2
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 3
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 4
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 5
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 6
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 7
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 8
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 9
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+            
+            <li>
+                <div class="left">
+                    <div class="product_info">
+                        <p>item 10
+                        <br>ZAR 100.00
+                        <br><b>Special Promo</b></p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="product_image">
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+                    <div class="product_cart">add</div>
+                </div>
+            </li>
+        
+                    
+                    
+        </ul>
+    </div> -->
+
+<section id="shop-body">
+    <div id="shop-body-content"> 
+        <div id="shop-body-filters"> </div>
+        <div id="shop-body-products"> 
+            <div id="pagination-bar"> 
+                <div id="pagi-sort"> SORT</div>
+                <div id="pagi-filter"> FILTER </div>
+                <div id="pagi-view-list">VIEW LIST</div>
+                <div id="pagination"></div>
+            </div>
+            <div class="products content-carousel">
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-card-img">
+                        <div class="product-appendage">
+                            <div id="alternatives">
+                                <ul>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                    <li><img src="/static/explore/art.jpg" alt=""></li>
+                                </ul>
+                            </div>
+                            <div class="product-special"> </div>
+                        </div>
+                        <img src="/static/explore/art.jpg" alt="">
+                    </div>
+    
+                    <div class="product-info">
+                        <p class="product-title">FIRST CARD'S CONTENT</p>
+                        <p class="product-promo">Buy 4 for R100.00</p>
+                        <div class="product-buy">
+                            <p class="product-price"><b>R35.95</b></p>
+                            <div class="cart">
+                                <div class="cart-rm"></div>
+                                <input class="cart-count" type="search" name="search">
+                                <div class="cart-add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+            </div>
+        </div>
+        
+    </div>
+    <div id="proceed-to-cart"> 
+        <p>PROCEED TO CHECKOUT</p>
+    </div>
+    
+</section>
+<div id="tmp-cart"> </div>
+<div id="tmp-filter"> 
+    <div id="filter-actions"> 
+        <span>x</span>
+
+        <span>Filter</span>
+        <span>Done</span>
+    </div>
+    <div id="filters">
+         <div id="filter-category"> 
+            <p>Category</p>
+            <input type="checkbox" name="category"> Category 1 <br>
+            <input type="checkbox" name="category"> Category 2 <br>
+            <input type="checkbox" name="category"> Category 3 <br>
+            <input type="checkbox" name="category"> Category 4 <br>
+        </div>
+        <div id="filter-brand"> 
+            <p>Brand</p>    
+        </div>
+        <div id="filter-price"> 
+            <p>Price</p>    
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

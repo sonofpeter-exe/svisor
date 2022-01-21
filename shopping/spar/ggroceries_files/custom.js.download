@@ -1,0 +1,463 @@
+if ((typeof Shopify) === 'undefined') { Shopify = {}; }
+
+console.log('Test');
+
+Shopify.getCartQuantity = function() {
+    var cartItemCounter = document.getElementById('cartQuant');
+    axios.get('/cart.js')
+        .then(function (response) {
+        // handle success
+        // console.log(response.data.item_count);
+        var newCount = response.data.item_count;
+        cartItemCounter.innerHTML = newCount;
+        })
+        .catch(function (error) {
+        // handle error
+        console.log(error);
+        })
+        .then(function () {
+        // always executed
+    });
+};
+
+Shopify.addItem = function(product, variant, quantity) {
+    Swal.fire({
+        toast: true,
+        title: 'Adding to cart',
+        position: 'bottom',
+        onBeforeOpen: () => {
+            Swal.showLoading()
+        },
+    });
+    axios.post('/cart/add.js', {
+        items: [
+            {
+                quantity: quantity,
+                id: variant,
+            }
+        ]
+    })
+    .then(function (response) {
+        // handle success
+        Swal.fire({
+            toast: true,
+            icon: 'success',
+            title: 'Item added',
+            position: 'bottom',
+            showConfirmButton: false,
+            timer: 2500,
+        });
+        $( "#prod-" + product ).removeClass( "tray-open" );
+        $( "#prod-" + product + " .add_toggle" ).toggleClass('opened');
+        Shopify.getCartQuantity();
+    })
+    .catch(function (error) {
+        // handle error
+        console.log(error);
+    })
+    .then(function () {
+            // always executed
+    });
+};
+
+// Search Bar Vue Component
+
+var searchBar = new Vue({
+    delimiters: ['${', '}'],
+    el: '#searchBar',
+    data: {
+        message: 'Test message',
+        query: '',
+        params: {},
+        result_products: [],
+        result_collections: [],
+        isTyping: false,
+        isLoading: false,
+        focused: false,
+        open: false,
+    },
+    watch: {
+        query: function (newQuery, oldQuery) {
+            // isTyping = true;
+            this.searchProducts();
+        }
+    },
+    computed: {
+        availableProducts: function () {
+            return this.result_products.filter(function (product) {
+                return product.available
+            })
+        }
+    },
+    methods: {
+        searchProducts: function() {
+            this.open = true;
+            this.isLoading = true;
+            axios.get('/search/suggest.json?q=' + this.query + '&resources[type]=product')
+            .then(response => {
+                this.isLoading = false;
+                this.result_products = response.data.resources.results.products;
+            });
+        },
+        searchPage() {
+            window.location.href = "search?type=product&q=" + encodeURI(this.query) + "*";
+        },
+        resultPrice: function(price) {
+            return Shopify.formatMoney(price, "R {{amount}}");
+        },
+        searchActive() {
+            this.focused = true;
+        },
+        close() {
+            this.focused = false;
+            this.open = false;
+        },
+        clear() {
+            this.open = false;
+            this.result_products = [];
+            this.result_collections = [];
+            this.query = '';
+        }
+    }
+})
+
+Vue.component('card-cart', {
+    props: ['productId', 'variantId', 'cartItems'],
+    data: function () {
+      return {
+        count: 0,
+        id: parseInt(this.variantId),
+        items: this.cartItems,
+        inCartQuant: 0,
+        quantity: 0,
+        trayOpen: false,
+        trayTimer: '',
+        update: {
+            items: [
+                {
+                    quantity: 1,
+                    id: this.variantId.toString(),
+                }
+            ]
+        },
+      }
+    },
+    watch: {
+        cartItems: function() {
+            this.items = this.cartItems;
+            for(var i = 0; i < this.cartItems.length; i++) {
+                if (this.cartItems[i].id == this.id) {
+                    console.log('Matched to cart item!');
+                    this.inCartQuant = this.cartItems[i].quantity;
+                    if (this.inCartQuant > 0) {
+                        this.quantity = this.inCartQuant;
+                    }
+                }
+            }
+        },
+    },
+    methods: {
+        clickQuant() {
+            if(this.trayOpen == false) {
+                this.trayOpen = true;
+                this.trayTimer = setTimeout(() => this.closeTray(), 5500);
+            }
+        },
+        closeTray() {
+            this.trayOpen = false;
+        },
+        add() {
+            if(this.trayOpen == false) {
+                this.trayOpen = true;
+            }
+            if(this.trayTimer != '') {
+                clearTimeout(this.trayTimer);
+            }
+            console.log('Adding!');
+            this.quantity++;
+            axios.post('/cart/add.js', this.update)
+            .then(response => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: '🛒 Added to cart',
+                    position: 'bottom',
+                    showConfirmButton: false,
+                    timer: 2500,
+                });
+                Shopify.getCartQuantity();
+                this.trayTimer = setTimeout(() => this.closeTray(), 5500);
+            })
+            .catch(function (error) {
+                // handle error
+                this.quantity--;
+                console.log(error);
+            });
+        },
+        remove() {
+            console.log('Removing!');
+            if(this.trayTimer != '') {
+                clearTimeout(this.trayTimer);
+            }
+            this.quantity--;
+            axios.post('/cart/change.js', {quantity:this.quantity,id:this.variantId})
+            .then(response => {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: '🛒 Updated quantity',
+                    position: 'bottom',
+                    showConfirmButton: false,
+                    timer: 2500,
+                });
+                Shopify.getCartQuantity();
+                this.trayTimer = setTimeout(() => this.closeTray(), 5500);
+            })
+            .catch(function (error) {
+                // handle error
+                this.quantity++;
+                console.log(error);
+            });
+        }
+    },
+    template: `
+        <div class="card-cart--adder-block">
+            <div class="card-cart--adder" v-bind:class="{ open: trayOpen }">
+                <div class="card-cart--toggler">
+                    <button class="add_toggle closed opened remove_toggle" @click="remove">
+                        <div class="circle">
+                            <div class="horizontal"></div>
+                            <div class="vertical"></div>
+                        </div>
+                    </button>
+                    <input v-model="this.quantity">
+                    <div v-if="this.quantity > 0" class="click-quant" @click="clickQuant">
+                        
+                        {{ this.quantity }}
+                    </div>
+                    <button class="add_toggle closed" @click="add">
+                        <div class="circle">
+                            <div class="horizontal"></div>
+                            <div class="vertical"></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `
+});
+
+var collectionList = new Vue({
+    delimiters: ['${', '}'],
+    el: '#collectionList',
+    data: {
+        test: 'test',
+        cartItems: [],
+    },
+    mounted() {
+        axios.get('/cart.js')
+        .then(response => {
+            this.cartItems = response.data.items;
+        });
+    },
+    watch: {
+    },
+    methods: {
+    }
+})
+
+var mobileSearch = new Vue({
+    delimiters: ['${', '}'],
+    el: '#mobileSearch',
+    data: {
+        message: 'Test message',
+        query: '',
+        params: {},
+        result_products: [],
+        result_collections: [],
+        isTyping: false,
+        isLoading: false,
+        focused: false,
+        open: false,
+    },
+    watch: {
+        query: function (newQuery, oldQuery) {
+            // isTyping = true;
+            this.searchProducts();
+        }
+    },
+    methods: {
+        searchProducts: function() {
+            this.open = true;
+            this.isLoading = true;
+            axios.get('/search/suggest.json?q=' + this.query + '&resources[type]=product')
+            .then(response => {
+                this.isLoading = false;
+                this.result_products = response.data.resources.results.products;
+            });
+        },
+        searchPage() {
+            window.location.href = "/search?type=product&q=" + encodeURI(this.query) + "*";
+        },
+        resultPrice: function(price) {
+            return Shopify.formatMoney(price, "R {{amount}}");
+        },
+        searchActive() {
+            this.focused = true;
+        },
+        close() {
+            this.focused = false;
+            this.open = false;
+        },
+        clear() {
+            this.open = false;
+            this.result_products = [];
+            this.result_collections = [];
+            this.query = '';
+        }
+    }
+})
+
+var cartPage = new Vue({
+    delimiters: ['${', '}'],
+    el: '#cartPage',
+    data: {
+        cartItems: [],
+        cartTotal: '',
+        update: {},
+    },
+    mounted() {
+        axios.get('/cart.js')
+        .then(response => {
+            this.cartItems = response.data.items;
+            this.cartTotal = Shopify.formatMoney(response.data.total_price, "R {{amount}}");
+        });
+    },
+    watch: {
+    },
+    methods: {
+        getCartTotal() { 
+            axios.get('/cart.js')
+            .then(response => {
+                this.cartTotal = Shopify.formatMoney(response.data.total_price, "R {{amount}}");
+            });
+        },
+        itemPrice: function(subtotal) {
+            return Shopify.formatMoney(subtotal, "R{{amount}}");
+        },
+        decreaseQuant: function(item) {
+            item.updating = true;
+            Swal.fire({
+                toast: true,
+                title: 'Updating quantity...',
+                position: 'bottom',
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+            });
+            var variant_id = item.variant_id.toString();
+            if(item.quantity > 1) {
+                item.quantity--;
+                this.update = {quantity:item.quantity,id: variant_id};
+                axios.post('/cart/change.js', this.update)
+                .then(response => {
+                    item.updating = false;
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: 'Updated',
+                        position: 'bottom',
+                        showConfirmButton: false,
+                        timer: 2500,
+                    });
+                    this.getCartTotal();
+                    Shopify.getCartQuantity();
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                });
+            }
+        },
+        increaseQuant: function(item) {
+            item.updating = true;
+            Swal.fire({
+                toast: true,
+                title: 'Updating quantity...',
+                position: 'bottom',
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+            });
+            var variant_id = item.variant_id.toString();
+            item.quantity++;
+            this.update = {quantity:item.quantity,id: variant_id};
+            axios.post('/cart/change.js', this.update)
+            .then(response => {
+                item.updating = false;
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Updated',
+                    position: 'bottom',
+                    showConfirmButton: false,
+                    timer: 2500,
+                });
+                this.getCartTotal();
+                Shopify.getCartQuantity();
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+            });   
+        },
+        removeItem: function(index, item) {
+            Swal.fire({
+                toast: true,
+                title: 'Removing item...',
+                position: 'bottom',
+                onBeforeOpen: () => {
+                    Swal.showLoading()
+                },
+            });
+            var variant_id = item.variant_id.toString();
+            this.update = {quantity:0,id:variant_id};
+            axios.post('/cart/change.js', this.update)
+            .then(response => {
+                this.cartItems.splice(index, 1);
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Removed item',
+                    position: 'bottom',
+                    showConfirmButton: false,
+                    timer: 2500,
+                });
+                this.getCartTotal();
+                Shopify.getCartQuantity();
+            })
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+            });
+        }
+    }
+})
+
+var productPage = new Vue({
+    delimiters: ['${', '}'],
+    el: '#productPage',
+    data: {
+        quantity: '1'
+    },
+    methods: {
+        decreaseQuant() {
+            if(this.quantity > 1) {
+                this.quantity--;
+            }
+        },
+        increaseQuant() {
+            this.quantity++;
+        }
+    }
+})

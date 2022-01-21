@@ -1,0 +1,1 @@
+monetate.r4("1939863440-0",[{"args":[1629081882],"op":"sst"},{"eventId":97410,"args":["div.recommendation_container.home_tabbed > div:eq(1) > div.tabs-content"],"op":"trackClick"}]);

@@ -1,0 +1,162 @@
+ACC.deliveryinstructions = {
+
+    _autoload: [
+        "initGooglePlaces",
+        "updateCheckoutButton"
+    ],
+
+    updateCheckoutButton: function () {
+        let checkoutButton = $("#orderSummaryCheckoutButton");
+        if ($("#deliveryAddressInputField").data("deliveryAddressRequired")) {
+            if ($("#deliveryAddressInputFieldReadonly").val() === "") {
+                checkoutButton.attr('disabled', 'disabled');
+            } else {
+                checkoutButton.removeAttr('disabled')
+            }
+        }
+    },
+
+    initGooglePlaces: function () {
+        const deliveryAddressRequired = $("#deliveryAddressInputField").data("deliveryAddressRequired");
+        if (deliveryAddressRequired === true) {
+            ACC.global.addGooglePlacesApi("ACC.deliveryinstructions.initGooglePlacesAutocomplete");
+        }
+    },
+
+    initGooglePlacesAutocomplete: function() {
+
+        const input = $("#deliveryAddressInputField")[0];
+
+        const options = {
+            fields: ['formatted_address'],
+            types: ['address'],
+            strictBounds: true
+        };
+
+        autocomplete = new google.maps.places.Autocomplete(input, options);
+
+        if (input.dataset.restrictBounds === "true") {
+            autocomplete.setBounds(ACC.deliveryinstructions.createCircle().getBounds());
+        } else {
+            autocomplete.setComponentRestrictions({'country': 'za'});
+        }
+
+        autocomplete.addListener('place_changed', function () {
+            ACC.deliveryinstructions.handlePlaceChanged();
+        });
+
+    },
+
+    handlePlaceChanged: function () {
+        let place = autocomplete.getPlace();
+        if (!place.formatted_address) {
+            // User entered the name of a Place that was not suggested and pressed the Enter key, or the Place Details request failed.
+            ACC.deliveryinstructions.showErrorMessage();
+        } else {
+            ACC.deliveryinstructions.hideErrorMessage();
+            ACC.deliveryinstructions.updateDeliveryInstructions();
+        }
+    },
+
+    //this function is called when focus on the input field is lost. It refocuses the input, and hits enter, triggering google's listener
+    handleDeliveryAddressEditEvent: function () {
+        if (jQuery('.pac-item:hover').length === 0) {
+            google.maps.event.trigger(this, 'focus', {});
+            google.maps.event.trigger(this, 'keydown', {
+                keyCode: 13
+            });
+        }
+    },
+
+    checkForNoResults: function () {
+        let resultList = $('.pac-container')[0].style.display;
+        //if the display of the results dropdown is set to none, it means there are no more results returned. Display error
+        if (resultList === 'none' && $("#deliveryAddressInputField")[0].value.length > 1) {
+            ACC.deliveryinstructions.showErrorMessage();
+        } else {
+            ACC.deliveryinstructions.hideErrorMessage();
+        }
+    },
+
+    createCircle: function () {
+
+        const input = $("#deliveryAddressInputField")[0];
+
+        const posLat = input.dataset.posLat;
+        const posLng = input.dataset.posLng;
+
+        const posGeolocation = new google.maps.LatLng(posLat, posLng);
+
+        const posRadius = input.dataset.posRadius * 1000;
+
+        return new google.maps.Circle({
+            center: posGeolocation,
+            radius: posRadius
+        });
+
+    },
+
+    updateDeliveryInstructions: function () {
+        var url = ACC.config.contextPath + '/delivery-instructions';
+        var deliveryInstructions = autocomplete.getPlace().formatted_address;
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'POST',
+            data: {deliveryInstructions: deliveryInstructions},
+            complete: function () {
+                ACC.deliveryinstructions.hideDeliveryAddressInputFields();
+                ACC.deliveryinstructions.updateCheckoutButton();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                let error = "There was a problem attempting to save your delivery address instructions";
+                ACC.toaster.showToaster("error", error + thrownError);
+            }
+        });
+    },
+
+    hideDeliveryAddressInputFields: function () {
+        $("#deliveryAddressInputFieldReadonly").val($("#deliveryAddressInputField").val());
+        ACC.deliveryinstructions.toggleElementVisibility();
+    },
+
+    clearDeliveryInstructions: function () {
+        let url = ACC.config.contextPath + '/delivery-instructions';
+        let deliveryInstructions = "";
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'POST',
+            data: {deliveryInstructions: deliveryInstructions},
+            complete: function () {
+                ACC.deliveryinstructions.showDeliveryAddressInputFields();
+                ACC.deliveryinstructions.updateCheckoutButton();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                let error = "There was a problem attempting to clear your delivery address instructions";
+                ACC.toaster.showToaster("error", error + thrownError);
+            }
+        });
+    },
+
+    showDeliveryAddressInputFields: function () {
+        $("#deliveryAddressInputField").val("");
+        $("#deliveryAddressInputFieldReadonly").val("");
+        ACC.deliveryinstructions.toggleElementVisibility();
+    },
+
+    toggleElementVisibility: function () {
+        $("#deliveryAddressInputField").toggle();
+        $("#deliveryAddressInputFieldReadonly").toggle();
+        $("#clearDeliveryInstructionsButton").toggle();
+    },
+
+    hideErrorMessage: function () {
+        $("#deliveryAddressInstructionsErrorMessage")[0].style.display = 'none';
+    },
+
+    showErrorMessage: function () {
+        $("#deliveryAddressInstructionsErrorMessage")[0].style.display = 'block';
+    }
+
+};

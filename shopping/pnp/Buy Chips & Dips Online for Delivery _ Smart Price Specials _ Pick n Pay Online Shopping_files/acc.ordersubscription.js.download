@@ -1,0 +1,111 @@
+ACC.ordersubscription = {
+
+    bindEvents: function () {
+        $(".js-edit-subscription-name").on("click", ACC.ordersubscription.editSubscriptionName);
+        $(".js-update-subscription-name").on("click", ACC.ordersubscription.updateSubscriptionName);
+        $(".js-cancel-subscription").on("click", ACC.ordersubscription.cancelSubscription);
+    },
+
+    editSubscriptionName: function () {
+        $(".js-subscription-name").attr("contentEditable", true).focus();
+        $(".js-edit-subscription-name").hide();
+        $(".js-update-subscription-name").show();
+    },
+
+    updateSubscriptionName: function () {
+        var orderSubscriptionCode = $(".js-ordersubscription-code").val();
+        var name = $(".js-subscription-name").text();
+        $.ajax({
+            url: ACC.config.contextPath + "/subscription/" + orderSubscriptionCode + "/" + name,
+            cache: false,
+            type: 'POST',
+            success: function () {
+                var successMessage = $(".js-subscription-update-success-message").val();
+                $.toaster({
+                    message: successMessage,
+                    priority: 'pnp-success'
+                });
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                var errorMessage = $(".js-subscription-update-failed-message").val();
+                $.toaster({
+                    message: errorMessage,
+                    priority: 'pnp-danger',
+                    logMessage: errorMessage + " Error details [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                });
+            },
+            complete: function () {
+                $(".js-edit-subscription-name").show();
+                $(".js-update-subscription-name").hide();
+            }
+        });
+    },
+    
+    cancelSubscription: function () {
+        var confirmCancellationText = $(this).data("subscription-confirm-cancellation-text");
+        var serverErrorText = $(this).data("cancel-subscription-server-error-text");
+        
+        var subscriptionOrderCode = $(this).data("subscriptionOrderCode");
+        var subscriptionFrequency = $(this).data("subscriptionFrequency");
+        
+        $.confirmation({
+            title: "ARE YOU SURE YOU WOULD LIKE TO CANCEL THIS SUBSCRIPTION?",
+            message: confirmCancellationText,
+            button1: {
+                text: "YES",
+                action: function () {
+                    $.ajax({
+                        url: ACC.config.contextPath + "/subscription/subscription/" + subscriptionOrderCode + "/cancelSubscription",
+                        cache: false,
+                        type: 'POST',
+                        success: function (jsonData) {
+                            if (jsonData.statusCode == 'success') {
+                                ACC.toaster.reloadAndShowToaster(jsonData.toastLevel, jsonData.toastMessage);
+                                
+                                $(".js-hide-on-successful-subscription-cancellation").hide();
+                                $(".js-subscription-status").html(jsonData.newSubscriptionStatus);
+                                if (typeof jsonData.newDisplayNextUpcomingOrderDate === 'undefined') { // Invalid value
+                                    console.error("Undefined 'newNextUpcomingOrderDate' received from the server.");
+                                    $(".js-subscription-next-upcoming-order-date-row").hide();
+                                } else if (jsonData.newDisplayNextUpcomingOrderDate == '') { // Json-representation of _null_ value
+                                    $(".js-subscription-next-upcoming-order-date-row").hide();
+                                } else { // Valid value
+                                    $(".js-subscription-next-upcoming-order-date").html(jsonData.newDisplayNextUpcomingOrderDate);
+                                }
+                            } else {
+                                if (typeof jsonData.toastLevel !== 'undefined' && typeof jsonData.toastMessage !== 'undefined') {
+                                   ACC.toaster.reloadAndShowToaster(jsonData.toastLevel, jsonData.toastMessage);
+                                } else {
+                                    var errorMessage = serverErrorText.replace(new RegExp("\\{0\\}", "g"), subscriptionFrequency.toLowerCase());
+                                    $.toaster({
+                                        message: errorMessage,
+                                        priority: 'pnp-danger'
+                                    });
+                                }
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            var errorMessage = serverErrorText.replace(new RegExp("\\{0\\}", "g"), subscriptionFrequency.toLowerCase());
+                            $.toaster({
+                                message: errorMessage,
+                                priority: 'pnp-danger',
+                                logMessage: errorMessage + " Error details [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                            });
+                        }
+                    });
+                }
+            },
+            button2: {
+                text: "NO",
+                action: function () {
+                }
+            }
+        });
+    }
+}
+
+$(document).ready(function () {
+    if ($(".subscription-details").length > 0 || $(".order-history").length > 0) {
+        ACC.ordersubscription.bindEvents();
+    }
+});

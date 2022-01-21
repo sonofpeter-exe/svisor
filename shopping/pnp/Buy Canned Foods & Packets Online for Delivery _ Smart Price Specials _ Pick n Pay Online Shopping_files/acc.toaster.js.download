@@ -1,0 +1,97 @@
+ACC.toaster = {
+
+    _autoload: [
+        "showToasterOnPageLoad"
+    ],
+    
+    showToaster: function(toastLevel, toastMessage) {
+        var toastStyle = ACC.toaster.getToastStyle(toastLevel);
+        if (toastLevel === "error") {
+            $.toaster({
+                message: toastMessage,
+                priority: toastStyle,
+                logMessage: "Error: " + toastMessage
+            });
+            return;
+        }
+        
+        $.toaster({
+            message: toastMessage,
+            priority: toastStyle
+        });
+    },
+    
+    reloadAndShowToaster: function(toastLevel, toastMessage) {
+        if (toastLevel === "error") {
+            $.toaster({
+                message: toastMessage,
+                priority: ACC.toaster.getToastStyle("error"),
+                logMessage: "Error response: " + toastMessage
+            });
+            return;
+        }
+        
+        if (toastLevel === "info" || toastLevel === "warn") {
+            var url = window.location.href;    
+            if (url.indexOf("?") === -1) {
+                url = url + "?";
+            } else {
+                url = url + "&";
+            }
+            url = url + "toastLevel=" + toastLevel + "&toastMessage=" + toastMessage;
+            window.location.href = url;
+            return;
+        }
+        
+        console.error("Unsupported - unrecognized toast level: " + toastLevel);
+    },
+    
+    showToasterOnPageLoad: function() {
+        if (window.location.href.indexOf("toastLevel") !== -1) {
+            
+            var qs = ACC.util.getQueryString();
+            
+            var toastLevel = qs["toastLevel"];
+            var toastMessage = qs["toastMessage"];
+            if ((typeof toastLevel !== 'undefined') && (typeof toastMessage !== 'undefined')) {
+                var toastStyle = ACC.toaster.getToastStyle(toastLevel);
+                
+                if (toastLevel === "error") {
+                    $.toaster({
+                        message: toastMessage,
+                        priority: toastStyle,
+                        timeout: 10000,
+                        logMessage: "Error: " + toastMessage
+                    });
+                } else {
+                    $.toaster({
+                        message: toastMessage,
+                        priority: toastStyle,
+                        timeout: 10000
+                    });
+                }
+                
+                if (window.history && window.history.replaceState) {
+                    var cleanedUrl = window.location.href;
+                    cleanedUrl = ACC.util.removeUrlParameter(cleanedUrl, "toastLevel");
+                    cleanedUrl = ACC.util.removeUrlParameter(cleanedUrl, "toastMessage");
+
+                    window.history.replaceState(null, null, cleanedUrl);
+                }
+            }
+        }
+    },
+    
+    getToastStyle: function(toastLevel) {
+        if (toastLevel === "info") {
+            return "pnp-success";
+        } else if (toastLevel === "warn") {
+            return "pnp-warning";
+        } else if (toastLevel === "error") {
+            return "pnp-danger";
+        }
+        
+        console.error("Unsupported - unrecognized toast level: " + toastLevel);
+        return "pnp-warning";
+    }
+};

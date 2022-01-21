@@ -1,0 +1,13 @@
+var screenXs="636px";
+var screenSm="1024px";
+var screenMd="1280px";
+var screenLg="1920px";
+
+var screenXsMin="320px";
+var screenSmMin="637px";
+var screenMdMin="1025px";
+var screenLgMin="1281px";
+
+var screenXsMax="636px";
+var screenSmMax="1024px";
+var screenMdMax="1280px";

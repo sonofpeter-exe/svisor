@@ -1,0 +1,132 @@
+ACC.policiespopup = {
+
+    _autoload: [
+        "checkForPoliciesPopupComponent"
+    ],
+
+    checkForPoliciesPopupComponent: async function () {
+        if ($('.policies-popup-component').length > 0) {
+            await ACC.policiespopup.shouldPoliciesPopupBeRendered();
+        }
+    },
+
+    shouldPoliciesPopupBeRendered: async function () {
+
+        let componentUid = $('input[name="policiesPopupComponentUid"]').val();
+
+        //Check if the user has already seen the popup this session and clicked CLOSE
+        let isSessionAttributePresent = await ACC.policiesevaluations.isSessionAttributePresent();
+        if (isSessionAttributePresent) {
+            return;
+        }
+
+        //Check if the cookie is present
+        let doesPoliciesCookieExist = await ACC.cookiefunctions.getCookie(componentUid) === "true";
+        if (doesPoliciesCookieExist) {
+            return;
+        }
+
+        //Check if the customer has already seen the popup
+        let hasPoliciesPopupBeenAccepted = await ACC.policiesevaluations.hasPoliciesPopupBeenAccepted();
+        if (hasPoliciesPopupBeenAccepted) {
+            return;
+        }
+
+        ACC.policiespopup.fetchPoliciesPopup();
+
+    },
+
+    fetchPoliciesPopup: function () {
+        let targetUrl = ACC.config.contextPath + '/renderPoliciesPopup';
+        let method = "POST";
+        let componentUid = $('input[name="policiesPopupComponentUid"]').val();
+        let currentUrl = window.location.href;
+
+        $.ajax({
+            url: targetUrl,
+            type: method,
+            data: {componentUid: componentUid, currentUrl: currentUrl},
+
+            success: function (data) {
+
+                let popupHtmlContents = data.popupHtmlContents;
+                ACC.policiespopup.renderPoliciesPopup(popupHtmlContents, componentUid)
+
+            },
+
+            error: function (data, xht, textStatus, ex) {
+                console.log("The POPIA popup was not displayed, either because it was excluded from the current page, or an error occurred" + ex);
+            }
+
+        })
+    },
+
+    renderPoliciesPopup: function (popupHtmlContents, componentUid) {
+        if (ACC.global.isMobileMode()) {
+            $.colorbox({
+                html: popupHtmlContents,
+                width: '100%',
+                left: 0,
+                maxWidth: '800px',
+                className: 'policiesPopup',
+                overlayClose: false
+            });
+        } else {
+            $.colorbox({
+                html: popupHtmlContents,
+                width: '90%',
+                maxWidth: '800px',
+                className: 'policiesPopup',
+                overlayClose: false
+            });
+        }
+
+        $("button[name=policiesCloseButton]").on("click", function () {
+            ACC.policiespopup.handleCloseButton();
+        });
+
+        $("button[name=policiesAcceptButton]").on("click", function () {
+            ACC.policiespopup.handleAcceptButton(componentUid);
+        });
+
+    },
+
+    handleCloseButton: function () {
+
+        let targetUrl = ACC.config.contextPath + '/savePoliciesClosedToSession';
+        let method = "POST";
+
+        $.ajax({
+            url: targetUrl,
+            type: method,
+
+            error: function (xht, textStatus, ex) {
+                console.log("An error occurred attempting to save the policiesCloseButtonClicked to the session" + ex);
+            }
+
+        })
+
+        ACC.colorbox.close();
+    },
+
+    handleAcceptButton: function (componentUid) {
+
+        ACC.cookiefunctions.setCookie(componentUid);
+
+        let targetUrl = ACC.config.contextPath + '/savePoliciesAcceptedTime';
+        let method = "POST";
+
+        $.ajax({
+            url: targetUrl,
+            type: method,
+
+            error: function (xht, textStatus, ex) {
+                console.log("An error occurred attempting to save PoliciesAcceptedTime to customer" + ex);
+            }
+
+        })
+
+        ACC.colorbox.close();
+    }
+
+}

@@ -1,0 +1,22 @@
+{% extends 'explore/base.html' %}
+{% block content %}
+    <section>
+        <div id="register-form">
+            <form method="POST">
+                {% csrf_token %}
+                <fieldset class="">
+                    <legend>Join Today</legend>
+                    {{ form.as_p }}
+                </fieldset>
+                <div class="form-group">
+                    <button type="submit">Sign Up</button>
+                </div>
+            </form>
+            <div class="suggest-account">
+                <small class="text-muted">
+                    Already Have An Account? <a href="#">Sign In</a>
+                </small>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

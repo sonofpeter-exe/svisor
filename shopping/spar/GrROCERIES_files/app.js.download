@@ -1,0 +1,498 @@
+if (window.jQuery) {
+    console.log("Script already loadedddd!");
+} else {
+    var el = document.createElement("script");
+    (el.type = "text/javascript"), (el.src = ""), document.getElementsByTagName("head")[0].appendChild(el), console.log("Script loaded successfullyyy!");
+}
+
+// var el = document.createElement("script");
+// (el.type = "text/javascript"), (el.src = "https://code.jquery.com/jquery-3.6.0.min.js"), document.getElementsByTagName("head")[0].appendChild(el), console.log("Script loaded successfullyyy!");
+
+var $j = jQuery.noConflict(),
+    mainDomain = "https://gcc.metizapps.com",
+    baseUrl_gdpr = mainDomain;
+
+function decline_cookies() {
+    var cookie_url = baseUrl_gdpr + "/banner/GetCookieData";
+    var cookie_shop_url = baseUrl_gdpr;
+    var cookie_names = [];
+    var shop_url = Shopify.shop;
+
+    var cookies_list = document.cookie.split(";");
+    var cookies = cookies_list;
+    var count = 0;
+    for (var i in cookies) {
+        if (!isNaN(i)) {
+            cookie_names[count] = cookies[i].split("=")[0];
+            count++;
+        }
+    }
+    var theCookies = cookie_names.map(str => str.replace(/\s/g, ''));
+
+    jQuery.ajax({
+        type: "POST",
+        url: cookie_url,
+        data: {
+            cooki_data: theCookies,
+            cookie_shop_url: shop_url
+        },
+        async: 1,
+        success: function(res) {
+            var obj = jQuery.parseJSON(res);
+            $.each(obj, function(key, value) {
+                var n = new Date();
+                n.setTime(n.getTime() + 24 * 60 * 60 * 1e3);
+                var s = "; expires=" + n.toGMTString();
+                // var DisableBanner = document.cookie = escape("DisableBanner") + "=" + escape("dismiss") + s + "; SameSite=none;secure; path=/";
+                document.cookie = value + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            });
+        }
+    });
+}
+
+function Accept_cookie() {
+    var cookie_url = baseUrl_gdpr + "/banner/GetCookieData";
+    var cookie_shop_url = baseUrl_gdpr;
+    var shop_url = Shopify.shop;
+    var cookie_names = [];
+    var cookies_list = document.cookie.split(";");
+    var cookies = cookies_list;
+    var count = 0;
+    for (var i in cookies) {
+        if (!isNaN(i)) {
+            cookie_names[count] = cookies[i].split("=")[0];
+            count++;
+        }
+    }
+    var theCookies = cookie_names.map(str => str.replace(/\s/g, ''));
+    jQuery.ajax({
+        type: "POST",
+        url: cookie_url,
+        data: {
+            cooki_data: theCookies,
+            cookie_shop_url: shop_url
+        },
+        async: 1,
+        success: function(res) {
+            // console.log(res);
+            var obj = jQuery.parseJSON(res);
+            $.each(obj, function(key, value) {
+                var n = new Date();
+                n.setTime(n.getTime() + 24 * 60 * 60 * 1e3);
+                var s = "; expires=" + n.toGMTString();
+                // var DisableBanner = document.cookie = escape("DisableBanner") + "=" + escape("dismiss") + s + "; SameSite=none;secure; path=/";
+                document.cookie = value + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            });
+            
+        }
+    });
+}
+
+function Accept_allow_cookie() {
+    var cookie_url = baseUrl_gdpr + "/banner/GetCookieData";
+    var cookie_shop_url = baseUrl_gdpr;
+    var shop_url = Shopify.shop;
+    var cookie_names = [];
+    var cookies_list = document.cookie.split(";");
+    var cookies = cookies_list;
+    var count = 0;
+    for (var i in cookies) {
+        cookie_names[count] = cookies[i].split("=")[0];
+        count++;
+        var date = new Date();
+        date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+        document.cookie = encodeURIComponent(cookie_names[count]) + "=" + encodeURIComponent(cookies[i]) + expires + "; path=/";
+    }
+    // if (document.cookie) {
+    //     var n = new Date();
+    //     n.setTime(n.getTime() + 24 * 60 * 60 * 1e3);
+    //     var s = "; expires=" + n.toGMTString();
+    //     var DisableBanner = document.cookie = escape("DisableBanner") + "=" + escape("dismiss") + s + "; SameSite=none;secure; path=/";
+    //     window.Shopify.trackingConsent.setTrackingConsent(!0, hidebanner),
+    //         document.addEventListener("trackingConsentAccepted", function() {
+    //             console.log("trackingConsentAccepted event fired");
+    //         });
+    // } else {
+
+    // }
+}
+
+function customize(val) {
+    var selected_cookie = val.toString();
+    var cookie_url = baseUrl_gdpr + "/banner/get_cookie_data";
+    var cookie_shop_url = baseUrl_gdpr;
+    var shop_url = Shopify.shop;
+    var cookie_names = [];
+    
+    
+    var cookies_list = document.cookie.split(";");
+    var cookies = cookies_list;
+    var count = 0;
+    for (var i in cookies) {
+        cookie_names[count] = cookies[i].split("=")[0];
+        count++;
+    }
+    var theCookies = cookie_names.map(str => str.replace(/\s/g, ''));
+    jQuery.ajax({
+        type: "POST",
+        url: cookie_url,
+        data: {
+            cooki_data: val,
+            shop_url: shop_url,
+            browser_cookie: theCookies
+        },
+        async: 1,
+        success: function(res) {
+            var obj = jQuery.parseJSON(res);
+            $.each(obj, function(key, value) {
+                var n = new Date();
+                n.setTime(n.getTime() + 24 * 60 * 60 * 1e3);
+                var s = "; expires=" + n.toGMTString();
+                var customizecookie = document.cookie = escape("customizecookie") + "=" + escape("customize") + s + "; SameSite=none;secure; path=/";
+                document.cookie = value + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            });
+            var date = new Date();
+            date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toGMTString();
+            document.cookie = encodeURIComponent('ms_customize') + "=" + encodeURIComponent(selected_cookie) + expires + "; path=/";
+        }
+    });
+}
+
+$j(document).ready(function() {
+    var cookie_names = [];
+    var shop_id = '';
+    var cookies_list = document.cookie.split(";");
+    var cookies = cookies_list;
+    var count = 0;
+    for (var i in cookies) {       
+        if (!isNaN(i)) {
+            cookie_names[count] = cookies[i].split("=")[0];
+            count++;
+        }
+    }
+
+    var theCookies = cookie_names.map(str => str.replace(/\s/g, ''));
+    var object = theCookies;
+
+    let cookie = {};
+    // document.cookie.split(';').forEach(function(el) {
+    //     let [key, value] = el.split('=');
+    //     var cc = cookie[key.trim()] = value;
+    //     if (cc == 'info_decline_cookie_btn') {
+    //         console.log('dismiss__!!!');
+    //         decline_cookies();
+    //     } else if (cc == 'customize') {
+    //         console.log('customize__');
+    //         // customize();
+    //     }
+    // })
+    var e,
+        t,
+        o = ($style = "");
+    (e = baseUrl_gdpr + "/banner/getBannerAjax"),
+    (t = Shopify.shop),
+    cookieName = metiz_read_cookie('DisableBanner');
+    if (cookieName == 'info_decline_cookie_btn') {        
+        decline_cookies();
+    } else if (cookieName == 'info_accept_cookie_btn') {       
+        Accept_cookie();
+    }else if (cookieName == 'customize') { 
+        ms_cookie = metiz_read_cookie('ms_customize'); 
+        const ms_customize = ms_cookie.split(",");
+        customize(ms_customize);
+    }
+    if ((cookieName != 'info_allow_cookie_btn') && (cookieName != 'info_decline_cookie_btn') && (cookieName != 'info_accept_cookie_btn') && (cookieName != 'customize')) {
+        // console.log("banner call");
+        $j.ajax({
+                type: "POST",
+                url: e,
+                data: {
+                    shop_url: t
+                },
+                async: 1,
+                success: function(e) {
+                    try {
+                        var t = (allow_display = 1),
+                            n = $j.parseJSON(e),
+                            s = n.banner_data,
+                            i = n.eu_countries,
+                            c = n.cookies_scan_data;
+                        shop_id = s.shop_id;
+                        if ("1" !== s.eBannerEnable)
+                            return !1;
+                        if (1 == s.showOnlyInEurope) {
+                            var ajaxcall = $j.ajax({
+                                url      : "https://ipinfo.io",
+                                type     : "GET",
+                                async    : false,
+                                dataType :'json',
+                            });
+                            visitor = $j.parseJSON(ajaxcall.responseText);
+                            if(i.hasOwnProperty(visitor.country)) {
+                                allow_display = true;
+                            } else {
+                                allow_display = false;
+                            }
+                        } else {
+                            allow_display = true;
+                        }
+                        if (1 == allow_display) {
+                            (o = s.iCookieExpireTime);
+                            var l = s.deny_enable;
+                            $j("head").append('<link rel="stylesheet" href="' + s.front_css_link_setting + '" type="text/css" />');
+                            // var r = $("body").append(s.store_front_html);
+                            $j("body").append(s.store_front_html),
+                                "toppopup" == s.alignment_text ?
+                                ($j(".popuptextcss").css("top", s.banner_height + "px"), $j(".popuptextcss").css("bottom", "initial"), $j(".cc-window").css("height", s.banner_height + "px")) :
+                                "bottompopup" == s.alignment_text ?
+                                ($j(".popuptextcss").css("bottom", s.banner_height + "px"), $j(".popuptextcss").css("top", "initial"), $j(".cc-window").css("height", s.banner_height + "px")) :
+                                "left" == s.alignment_text ?
+                                $j(".Polaris-Modal-Dialog__Modal").addClass("leftpopuptext") :
+                                "right" == s.alignment_text ?
+                                $j(".Polaris-Modal-Dialog__Modal").addClass("rightpopuptext") :
+                                "center" == s.alignment_text ?
+                                $j(".Polaris-Modal-Dialog__Modal").addClass("centerpopuptext") :
+                                "top" == s.alignment_text ?
+                                ($j(".cc-window").css("top", "0"), $j(".cc-window").css("bottom", "unset !important"), $j(".cc-window").addClass("topbarsetting"), $j(".cc-window").css("height", s.banner_height + "px")) :
+                                ($j(".cc-window").css("top", "inherit"), $j(".cc-window").css("bottom", "0"), $j(".cc-window").css("height", t.banner_height + "px")),
+                                "top" == s.alignment_text ? ($j(".cc-window").css("top", "0"), $j(".cc-window").css("bottom", "")) : ($j(".cc-window").css("bottom", "0"), $j(".cc-window").css("top", "")),
+                                $j(".cc-banner").css("height", s.banner_height + "px"),
+                                $j(".cc-window").css("background-color", "#"+s.vBannerBackgroundColor),
+                                $j(".cc-window").css("font-size", s.iFontSize + "px"),
+                                $j(".cookie-model.cc-window").css("position", "inherit"),
+                                $j(".cc-window p").css("color", "#"+s.vBannerFontColor),
+                                $j(".cc-message").css("color", "#"+s.vBannerFontColor),
+                                $j(".cc-link").css("font-size", s.iLinkFontSize + "px"),
+                                $j(".cc-link").css("color", "#"+s.vLinkFontColor),
+                                $j(".cc-btn").css("background-color", "#"+s.vButtonBackgroundColor),
+                                $j(".cc-btn").css("color", "#"+s.vButtonFontColor),
+                                $j(".cc-btn").css("font-size", s.iButtonFontSize + "px"),
+                                $j(".cc-btn").css("border-style", "none"),
+                                // $j(".cc-btn").css("height",  "41px"),
+                                // $j(".cc-btn").css("border-color", s.vButtonBorderColor),
+                                //$j(".cc-btn").css("float", "right"),
+                                $j(".cc-btn").css("font-weight", "400"),
+                                $j(".deny_color").css("color", "#"+s.denyFontColor),
+                                $j(".deny_color").css("font-size", s.decline_link_font_size+ "px"),
+                                $j(".cookiebuttonbackcolor").css("background-color", "#"+s.cookie_button_back_color),
+                                $j(".cookie_p_fontcolor").css("color", "#"+s.cookie_fontcolor),
+                                $j(".cookie_p_font_size").css("font-size", s.cookie_font_size + "px"),
+                                $j(".close").css("position", "absolute"),
+                                $j(".close").css("top", "10px"),
+                                $j(".close").css("right", "30px"),
+                                $j(".close").css("transition", "all 200ms"),
+                                $j(".close").css("font-size", "30px"),
+                                $j(".close").css("font-weight", "bold"),
+                                $j(".close").css("text-decoration", "none"),
+                                $j(".close").css("color", "black"),
+                                $j("p:last-child").css("margin-bottom", "0"),
+                                $j(".bullet").css("background-color", "#"+s.cookie_button_back_color),
+                                // $j(".accept_padding").css("padding","0px !important"),
+                                // $j(".close:hover").css("color", "orange"),
+
+                                "" != s.vCustomCss && (($style = s.vCustomCss), $j("body").append("<style>" + $style + "</style>"));
+                        }
+
+                    } catch (e) {
+
+                    }
+
+                    //$(document).ready(function(){
+                    //     $(".filter-modal-body ul li:before").css("background-color", s.cookie_button_back_color);                  
+                    //});
+                    //if close button is clicked
+                    $j(".close").click(function() {
+                        $j('.rightpopuptext').css("visibility", "hidden");
+                        $j(".cc-window").hide();
+                        $j(".open_advance_feature").hide();
+                    });
+
+                    $j(document).ready(function() {
+                        if(s.custom_accept == 0){
+                            $j(".custom_accept").hide();
+                        }
+                        if(s.custom_decline == 0){
+                            $j(".custom_decline").hide();
+                        }
+                        $j(".switch-toggle").first().css("pointer-events", 'none');
+                        $j(".switch-toggle").first().css("opacity", '0.2');
+                        $j(".switch-toggle").first().find('.Polaris-Checkbox__Input').prop("checked", true);
+                        $j(".switch-toggle").first().find('.cookiebuttonbackcolor').css("background", "#"+s.cookie_button_back_color);
+                    });
+
+                    $j(document).on("click", ".switch-toggle", function() {
+                        // $(".switch-toggle").click(function () {
+                        if ($j(this).find('.Polaris-Checkbox__Input').is(":checked")) {
+                            $j(this).find('.cookiebuttonbackcolor').css("background", "#"+s.cookie_button_back_color);
+                        } else {
+                            // $j(this).find('.cookiebuttonbackcolor').css("background", "#575757");
+                            $j(this).find('.cookiebuttonbackcolor').css("background", "#D3D3D3");
+                            //$(this).removeClass(".cookiebuttonbackcolor");
+                        }
+                    });
+
+                    if (s.cookie_mode == 'accept_only' || s.cookie_mode == 'accept_decline') {
+                        decline_cookies();
+                    }
+
+                    $j(".deline").click(function() {
+                        decline_cookies();
+                    });
+
+                    $j("#info_accept_cookie_btn").click(function() {
+                        Accept_allow_cookie();
+                    });
+
+                    $j(document).on("click", ".getoptiondata", function() {
+                        var val = [];
+                        $(':checkbox:checked').each(function(i) {
+                            val[i] = $(this).val();
+                        });
+                        customize(val);
+                    });
+
+
+                    // $(".info_allow_cookie_btn").click(function() {
+                    //     var n = new Date();
+                    //     n.setTime(n.getTime() + 24 * 60 * 60 * 1e3);
+                    //     var s = "; expires=" + n.toGMTString();
+                    //     var DisableBanner = document.cookie = escape("DisableBanner") + "=" + escape("dismiss") + s + "; SameSite=none;secure; path=/";
+                    //     window.Shopify.trackingConsent.setTrackingConsent(!0, hidebanner);
+                    // });
+                },
+            }),
+
+            // $j(document).on("click", ".deny_color", function () {
+            //     $j(".open_advance_feature").show();
+            //     $j(".switch-toggle").first().css("pointer-events", 'none');
+            // }),
+
+            $j(document).on("click", ".dismissCookie", function() {
+                // alert(baseUrl_gdpr);
+                "" == o && (o = 365),
+                    mode = $(this).attr("data-id"),
+                    (function(e, o1, o) {
+                        if (o) {
+                            var t = new Date();
+                            t.setTime(t.getTime() + 24 * o * 60 * 60 * 1e3);
+                            var s = "; expires=" + t.toGMTString();
+                        } else s = "";
+                        document.cookie = escape("DisableBanner") + "=" + escape(mode) + s + "; SameSite=none;secure; path=/";
+                        if (mode == "info_decline_cookie_btn") {
+                            decline_cookies();
+                        }
+                        if (mode == "info_accept_cookie_btn") {
+                            Accept_allow_cookie();
+                        }
+                    })(0, 0, o),
+                    window.Shopify.trackingConsent.setTrackingConsent(!0, hidebanner),
+                    document.addEventListener("trackingConsentAccepted", function() {
+                        console.log("trackingConsentAccepted event fired");
+                    });
+                var e = baseUrl_gdpr + "/managecookie/updateCount",
+                    o1 = document.location.hostname;
+                $.ajax({
+                    type: "POST",
+                    async: 1,
+                    url: e,
+                    data: {
+                        shop: o1
+                    },
+                    success: function(e) {}
+                });
+
+
+                var customer_id = ShopifyAnalytics.meta.page.customerId;
+                if(customer_id){
+                    $.getJSON('https://api.db-ip.com/v2/free/self', function(data) {
+                    var db_data = data;
+                    var db_url = baseUrl_gdpr + "/banner/db_store_user_data";
+                        jQuery.ajax({
+                            type: "POST",
+                            url: db_url,
+                            data: {
+                                db_data: db_data,
+                                shop_id:shop_id,
+                                customer_id:customer_id,      
+                            },
+                            async: 1,
+                            success: function(res) {
+                                // var obj = jQuery.parseJSON(res);            
+                            }
+                        });
+                    });
+                }else{
+
+                }
+                
+            });   
+    }
+});
+
+function metiz_read_cookie(name) {
+    var nameEQ = escape(name) + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ')
+            c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0)
+            return unescape(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+}
+
+var $ = $j.noConflict();
+window.Shopify.loadFeatures([{
+    name: "consent-tracking-api",
+    version: "0.1"
+}], function(e) {
+    if (e)
+        throw e;
+});
+
+function hidebanner() {
+    $j(".cc-window").hide();
+}
+
+$j(document).on("click", ".close_popup_button", function() {
+    $j(".open_advance_feature").hide();
+});
+// $j(document).on("click", ".getoptiondata", function () {
+//       var val = [];
+//         $(':checkbox:checked').each(function(i){
+//           val[i] = $(this).val();
+//         });
+//       alert(val);
+
+// });
+
+$j(document).on("click", "#customize_popup", function() {
+    $j(".open_advance_feature").show();
+});
+// var cname = "_fbp";
+// var cvalue = "0SyfMdxtuTuSlIBnB..BgN4QU";
+// var exdays = 1;
+// window.onload = setCookie(cname, cvalue, exdays);
+
+// function setCookie(cname, cvalue, exdays) {
+//     var el = document.createElement("script");
+//     (el.type = "text/javascript"), (el.src = "https://www.google-analytics.com/analytics.js"), (el.src = "https://www.googletagmanager.com/gtm.js?id=GTM-NSNGHZX"), document.getElementsByTagName("head")[0].appendChild(el), console.log("Script Dynamic add successfullyyy!");
+//     const assign = cname + "=" + escape(cvalue) + ";";
+//     const d = new Date();
+//     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+//     const expires = "expires=" + d.toUTCString() + ";";
+//     const path = "path=/;";
+//     const domain = "domain=" + "metiz-tier-price.myshopify.com" + ";";
+//     document.cookie = assign + expires + path + domain;
+//     // var d = new Date(); 
+//     // d.setTime(d.getTime() + (exdays*24*60*60*1000));
+//     //  var expires = "expires="+ d.toUTCString();
+//     // //var expires = d.toUTCString();
+//     // var domain = ".facebook.com";
+//     // document.cookie = cname+"="+cvalue+expires+"; path=/; domain="+domain;
+//     // //document.cookie = cname +"=" + cvalue + ";domain=.facebook.com;path=/;expires=" + expires;
+//     // //document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+// }

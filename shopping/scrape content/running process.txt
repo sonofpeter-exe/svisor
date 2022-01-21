@@ -1,0 +1,35 @@
+# running process
+
+- scrape info
+- populate db
+    - frequent update:
+        - update product availability for relevant store
+        - preserve unique(at least one of type) product name, default img, desc
+- access db on site
+- display content
+
+TO DO:
+# setup internal app interface
+- validate where pagi links go for travesal func
+    - can i update links w/ f stirngs?
+- update print statements to populate table
+- official scrape & populate 1 shop
+- apply to other stores
+# comercial sites complete
+- setup local store db & interface
+- get default values
+# setup cart system
+- update cart from store page
+- split cart for multiple deliveries
+# setup checkout page
+- order number
+- receipt
+- payment method
+# setup delivery/tracking page
+- delivery address
+- track order status
+# setup login page
+
+# setup terms of service
+# setup employee app (shopper/driver)
+# setup vendor app

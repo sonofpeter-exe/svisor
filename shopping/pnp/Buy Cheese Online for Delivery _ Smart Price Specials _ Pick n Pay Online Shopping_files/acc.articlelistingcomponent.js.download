@@ -1,0 +1,45 @@
+ACC.articlelistingcomponent = {
+    _autoload: [
+        "bindLoadMoreButton"
+    ],
+    bindLoadMoreButton: function () {
+        $(document).on("click", ".js-article-listing-component-load-more-button", ACC.articlelistingcomponent.loadMore);
+    },
+    loadMore: function () {
+        var containingComponent = $(this).closest(".js-article-listing-component");
+        var loadMoreButton = containingComponent.find(".js-article-listing-component-load-more-button");
+        var url = containingComponent.data("loadMoreArticlesUrl");
+        var numberOfArticlesLoaded = containingComponent.data("numberOfArticlesLoaded");
+        var numberOfArticlesToLoadForLoadMore = containingComponent.data("numberOfArticlesToLoadForLoadMore");
+
+        ACC.common.showLoadingSpinner(loadMoreButton);
+
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'GET',
+            dataType: "json",
+            data: {
+                'startIndex': numberOfArticlesLoaded,
+                'numberToLoad': numberOfArticlesToLoadForLoadMore
+            },
+            success: function (response) {
+                ACC.common.hideLoadingSpinner(loadMoreButton);
+                if (response.numberOfArticlesLoaded < numberOfArticlesToLoadForLoadMore) {
+                    loadMoreButton.hide();
+                }
+                containingComponent.data("numberOfArticlesLoaded", containingComponent.data("numberOfArticlesLoaded") + response.numberOfArticlesLoaded);
+                containingComponent.find(".js-article-listing-component-article-grid").append(response.articleHtml);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                ACC.common.hideLoadingSpinner(loadMoreButton);
+                var error = "An error occurred while loading more articles. Please try again.";
+                $.toaster({
+                    message: error,
+                    priority: 'danger',
+                    logMessage: error + " Error details [" + xhr.responseText + ", " + ajaxOptions + ", " + thrownError + "]"
+                });
+            }
+        });
+    }
+};

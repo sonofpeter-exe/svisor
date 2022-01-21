@@ -1,0 +1,49 @@
+.single-img {
+    height: 564px;
+}
+
+.division-img {
+    height: 179px;
+}
+
+.news-img {
+    height: 278px;
+}
+
+.news-thumbnail-img {
+    height: 278px;
+}
+
+.promotions-img {
+    height: 363px;
+    max-width: 454px;
+}
+
+.competitions-img {
+    height: 564px;
+}
+
+.competitions-slider-img {
+    width: 1430px;
+/*    height: 500px; */
+}
+
+
+.money-kiosk-img {
+/*   height: 388px;
+   max-width: 388px;
+ */
+   height: 250px;
+   max-width: 325px; 
+
+}
+@media (max-width: 450px) {
+    .promotions-img, .news-img, .division-img, .money-kiosk-img, .competitions-img  {
+        height: auto;
+        max-width: 100%;
+    }
+    .clslogo{
+        margin-top: 23px;
+    }
+
+}

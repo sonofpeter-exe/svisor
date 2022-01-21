@@ -1,0 +1,43 @@
+ACC.fulfilmentoptions = {
+
+    bindEvents: function () {
+        $(document).on("click", ".js-fulfilment-option-select", ACC.fulfilmentoptions.selectFulfilmentOption);
+    },
+    selectFulfilmentOption: function () {
+        var targetUrl = ACC.config.contextPath + '/cart/isfulfilmentoptionvalid';
+        var method = "GET";
+        var fulfilmentOption = $('input:radio[name="fulfilmentOptionRadioButton"]:checked').val();
+        $.ajax({
+            url: targetUrl,
+            type: method,
+            data: {fulfilmentOption: fulfilmentOption},
+            beforeSend: function ()
+            {
+                $('#fulfillmentOptionLoadingOverlay').show();
+            },
+            success: function (data) {
+                if (data == true) {
+                    ACC.fulfilmentslotcomponent.loadFulfilmentSlotGrid(fulfilmentOption);
+                } else {
+                    ACC.fulfilmentoptions.displayErrorMessage();
+                }
+            },
+            error: function (xht, textStatus, ex) {
+                ACC.fulfilmentoptions.displayErrorMessage();
+                $('#fulfillmentOptionLoadingOverlay').hide();
+            }
+        });
+    },
+    displayErrorMessage: function () {
+        var message = $(".js-delivery-option-invalid-message").val();
+        $.toaster({
+            message: message,
+            priority: 'pnp-danger'
+        });
+        //This will ensure that only valid options are reloaded again
+        ACC.fulfilmentslotcomponent.loadFulfilmentSlotPanel();
+    }
+}
+$(document).ready(function () {
+    ACC.fulfilmentoptions.bindEvents();
+});

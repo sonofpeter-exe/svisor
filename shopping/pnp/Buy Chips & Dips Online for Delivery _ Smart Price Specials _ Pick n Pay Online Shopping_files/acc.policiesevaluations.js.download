@@ -1,0 +1,46 @@
+ACC.policiesevaluations = {
+
+    isSessionAttributePresent: async function () {
+
+        let targetUrl = ACC.config.contextPath + '/isThePoliciesSessionAttributePresent';
+        let method = "GET";
+
+        return await $.ajax({
+            url: targetUrl,
+            type: method,
+
+            success: function (data) {
+                return data;
+            },
+
+            error: function (xht, textStatus, ex) {
+                console.log("An error occurred attempting to check for the session attribute" + ex);
+                return false;
+            }
+
+        });
+
+    },
+
+    hasPoliciesPopupBeenAccepted: async function () {
+
+        let targetUrl = ACC.config.contextPath + '/hasPoliciesPopupBeenAccepted';
+        let method = "GET";
+
+        return await $.ajax({
+            url: targetUrl,
+            type: method,
+
+            success: function (data) {
+                return data;
+            },
+
+            error: function (xht, textStatus, ex) {
+                console.log("An error occurred attempting to check if the user has accepted the policies popup" + ex);
+                return false;
+            }
+
+        });
+    }
+
+}

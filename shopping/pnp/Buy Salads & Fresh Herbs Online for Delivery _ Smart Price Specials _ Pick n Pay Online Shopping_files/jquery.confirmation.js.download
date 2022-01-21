@@ -1,0 +1,91 @@
+(function ($, undefined) {
+    var confirming =
+        {
+            confirmation:
+                {
+                    'id': '#pnp-confirm',
+                    'container': 'body',
+                    'template': '<div></div>',
+                    'class': 'confirmation',
+                    'default': '<div id="pnp-confirm" class="pnp-confirm js-close">' +
+                        '<div class="pnp-confirm-content">' +
+                        '<span class="pnp-close js-close"></span> ' +
+                        '<p class="js-title pnp-confirm-title"></p>' +
+                        '<p class="js-message pnp-confirm-message"></p>' +
+                        '<button class="js-button1 confirmationRedBtn" type="button">Yes</button>' +
+                        '<button class="js-button2 confirmationBlueBtn" type="button">No</button>' +
+                        '</div></div>'
+                },
+            loadEvents: function (button1Action, button2Action) {
+                $(".js-button1").click(function () {
+                    $(confirming.confirmation.id).hide();
+                    button1Action && button1Action();
+                });
+                $(".js-button2").click(function () {
+                    $(confirming.confirmation.id).hide();
+                    button2Action && button2Action();
+                });
+                $(".js-close").click(function (data, handler) {
+                    if (data.target == this) {
+                        $(confirming.confirmation.id).hide();
+                    }
+                });
+            },
+            configure: function (button1Enabled, button2Enabled) {
+                button1Enabled ? $(".js-button1").removeAttr("disabled") : $(".js-button1").prop("disabled", true);
+                button2Enabled ? $(".js-button2").removeAttr("disabled") : $(".js-button2").prop("disabled", true);
+            },
+            replaceText: function (title, message, button1Text, button2Text) {
+                title && $(".js-title").html(title);
+                if (message && message !== 'null') {
+                    $(".js-message").html(message);
+                }
+                button1Text && $(".js-button1").html(button1Text);
+                button2Text && $(".js-button2").html(button2Text);
+            },
+            notify: function (title, message, button1Text, button2Text, button1Enabled, button2Enabled, button1Action, button2Action) {
+                $(confirming.confirmation.id).remove();
+                $(confirming.confirmation.template).appendTo(confirming.confirmation.container)
+                    .html(confirming.confirmation.default);
+                confirming.replaceText(title, message, button1Text, button2Text);
+                confirming.configure(button1Enabled, button2Enabled);
+                confirming.loadEvents(button1Action, button2Action);
+                $(confirming.confirmation.id).show();
+            }
+        };
+
+    var defaults = {};
+    var settings = {};
+    $.extend(settings, defaults);
+
+    $.confirmation = function (options) {
+        if (typeof options === 'object') {
+            if ('logMessage' in options) {
+                console.log(options.logMessage);
+            }
+            this.title = ('title' in options) ? options.title : '';
+            this.message = ('message' in options) ? options.message : '';
+
+            this.button1Enabled = true;
+            if ('button1' in options) {
+                this.button1Text = ('text' in options.button1) ? options.button1.text : '';
+                this.button1Action = ('action' in options.button1) ? options.button1.action : '';
+                this.button1Enabled = ('enabled' in options.button1) ? options.button1.enabled : this.button1Enabled;
+            }
+            
+            this.button2Enabled = true;
+            if ('button2' in options) {
+                this.button2Text = ('text' in options.button2) ? options.button2.text : '';
+                this.button2Action = ('action' in options.button2) ? options.button2.action : '';
+                this.button2Enabled = ('enabled' in options.button2) ? options.button2.enabled : this.button2Enabled;
+            }
+            
+            confirming.notify(this.title, this.message, this.button1Text, this.button2Text, this.button1Enabled, this.button2Enabled, this.button1Action, this.button2Action);
+        }
+    };
+
+    $.confirmation.reset = function () {
+        settings = {};
+        $.extend(settings, defaults);
+    };
+})(jQuery);

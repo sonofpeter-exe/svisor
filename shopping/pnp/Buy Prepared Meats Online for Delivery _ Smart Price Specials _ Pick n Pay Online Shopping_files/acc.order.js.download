@@ -1,0 +1,463 @@
+ACC.order = {
+
+    _autoload: [
+        "initializeOrderAccordionPane",
+        "backToOrderHistory",
+        "backToOrders",
+        "bindMultidProduct",
+        "initButtons",
+        "setupOrderConfirmationSubscriptionActiveBlock",
+        "cancelOrder",
+        "pauseSubscription",
+        "unpauseSubscription",
+        "showToasts"
+    ],
+
+    initializeOrderAccordionPane: function () {
+        $('.order-accordion-pane').liloAccordion({
+            onlyOneActive: false,
+            initFirstActive: true,
+            hideControl: false,
+            openNextOnClose: false
+        });
+    },
+
+    initButtons: function () {
+        $('.add-to-my-list').addClass('dsb-list-btn');
+        $('.add-to-trl').addClass('dsb-list-btn');
+        $(".js-order-amend-popup").on("click", function () {
+            ACC.order.displayPromotionInformationPopup();
+        });
+        if ($("#showPopupOnLoad").val() === "true") {
+            ACC.order.displayPromotionInformationPopup();
+        }
+    },
+
+    displayPromotionInformationPopup: function () {
+
+        let targetUrl = ACC.config.contextPath + '/promotionInformationPopup';
+        let method = "POST";
+        let componentUid = $('input[name="componentUid"]').val();
+        let orderCode = $(".js-order-amend-popup").data("orderCode");
+        if (!orderCode || orderCode ==="") {
+            orderCode = $('input[name="data_order_code"]').val();
+        }
+
+        $.ajax({
+            url: targetUrl,
+            type: method,
+            data: {componentUid: componentUid},
+            success: function (data) {
+
+                let html = data.popupContents;
+                if (ACC.global.isMobileMode()) {
+                    $.colorbox({
+                        html: html,
+                        width: '100%',
+                        left: 0,
+                        maxWidth: '800px',
+                        className: 'promotionInformationPopup'
+                    });
+                } else {
+                    $.colorbox({
+                        html: html,
+                        width: '90%',
+                        maxWidth: '800px',
+                        className: 'promotionInformationPopup'
+                    });
+                }
+
+                $("button[name=acceptPromotionInformation]").on("click", function () {
+
+                    let amendUrl = data.successUrl;
+                    let amendUrlRedirect = amendUrl.replace("{orderCode}", orderCode);
+
+                    window.location.href = ACC.config.contextPath + amendUrlRedirect;
+                });
+            },
+            error: function (xht, textStatus, ex) {
+                console.log("An error occurred attempting to display the Promotion Information Popup" + ex);
+                return null
+            }
+        });
+    },
+
+    onCheckBoxClick: function () {
+        $('button[data-select-all]').attr('data-select-all', '1').text('SELECT ALL');
+        $("input[type='checkbox']").change(function () {
+
+            var chkArray = [];
+            $(".chk:checked").each(function () {
+                chkArray.push($(this).val());
+            });
+
+            var selected;
+            selected = chkArray.join(',') + ",";
+            if (selected.length > 1) {
+                $('.add-to-my-list').removeClass('dsb-list-btn');
+                $('.add-to-trl').removeClass('dsb-list-btn');
+                $('button[data-select-all]').attr('data-select-all', '1').text('DESELECT ALL');
+            } else {
+                $('.add-to-my-list').addClass('dsb-list-btn');
+                $('.add-to-trl').addClass('dsb-list-btn');
+            }
+        });
+    },
+
+    backToOrderHistory: function () {
+        $(".orderBackBtn").on("click", function () {
+            var sUrl = $(this).data("backToOrders");
+            window.location = sUrl;
+        });
+    },
+    backToOrders: function () {
+        $(".orderTopBackBtn").on("click", function () {
+            var sUrl = $(this).data("backToOrders");
+            window.location = sUrl;
+        });
+    },
+
+    bindMultidProduct: function () {
+        // link to display the multi-d grid in read-only mode
+        $(document).on("click", '.showMultiDGridInOrder', function (event) {
+            ACC.order.populateAndShowGrid(this, event, true);
+            return false;
+        });
+
+        // link to display the multi-d grid in read-only mode
+        $(document).on("click", '.showMultiDGridInOrderOverlay', function (event) {
+            ACC.order.populateAndShowCheckoutGridOverlay(this, event);
+        });
+
+    },
+
+    populateAndShowGrid: function (element, event, readOnly) {
+        var itemIndex = $(element).data("index");
+        grid = $("#ajaxGrid" + itemIndex);
+        var gridEntries = $('#grid' + itemIndex);
+
+        $(element).toggleClass('open');
+
+        if (!grid.is(":hidden")) {
+            grid.slideUp();
+            return;
+        }
+
+        if (grid.html() != "") {
+            grid.slideToggle("slow");
+            return;
+        }
+
+        var strSubEntries = gridEntries.data("sub-entries");
+        var arrSubEntries = strSubEntries.split(',');
+        var firstVariantCode = arrSubEntries[0].split(':')[0];
+
+        var targetUrl = gridEntries.data("target-url");
+        if (targetUrl == '') {
+            targetUrl = ACC.config.contextPath + '/my-account/order/' + gridEntries.data("order-code") + '/getReadOnlyProductVariantMatrix';
+        }
+
+        var method = "GET";
+        $.ajax({
+            url: targetUrl,
+            data: {productCode: firstVariantCode},
+            type: method,
+            success: function (data) {
+                grid.html(data);
+                grid.slideDown("slow");
+            },
+            error: function (xht, textStatus, ex) {
+                var error = "Failed to get variant matrix";
+                $.toaster({
+                    message: error,
+                    priority: 'danger',
+                    logMessage: error + " Error details [" + xht + ", " + textStatus + ", " + ex + "]"
+                });
+            }
+
+        });
+    },
+
+    populateAndShowCheckoutGridOverlay: function (element, event) {
+        event.preventDefault();
+
+        var itemIndex = $(element).data("index");
+        var gridEntries = $('#grid' + itemIndex);
+
+        var strSubEntries = gridEntries.data("sub-entries");
+        var productName = gridEntries.data("product-name");
+        var arrSubEntries = strSubEntries.split(',');
+        var firstVariantCode = arrSubEntries[0].split(':')[0];
+        var orderCode = gridEntries.data("order-code");
+
+        var targetUrl = ACC.config.contextPath + '/my-account/order/' + orderCode + '/getReadOnlyProductVariantMatrix?productCode=' + firstVariantCode;
+
+        $.colorbox({
+            href: targetUrl,
+            title: productName,
+            className: 'read-only-grid',
+            close: '<span class="glyphicon glyphicon-remove"></span>',
+            width: window.innerWidth > parseInt(cboxOptions.maxWidth) ? cboxOptions.maxWidth : cboxOptions.width,
+            height: window.innerHeight > parseInt(cboxOptions.maxHeight) ? cboxOptions.maxHeight : cboxOptions.height,
+            onComplete: function () {
+
+                var cTitle = $('#cboxTitle').clone();
+                $('#cboxTitle').remove();
+                cTitle.insertBefore('#cboxLoadedContent');
+                $('body').addClass('offcanvas');
+                var oH = $('#cboxLoadedContent').height();
+                $('#cboxLoadedContent').height((oH - $('#cboxTitle').height()) + 'px');
+
+            },
+
+            onClosed: function () {
+                $('body').removeClass('offcanvas');
+            }
+
+        });
+    },
+
+    addProductsToTrolleyFromOrderPage: function (th) {
+        var productsList = new Array();
+        $('.shoppinglists-itemList > .listPageHeader-short').each(function () {
+            $(this).find('.shoppinglists-itemList-item .thumbSelect .chk').each(function () {
+                if ($(this).is(':checked')) {
+                    productsList.push($(this).closest('.row').find('.data-prod').val());
+                }
+            });
+        });
+        var productsQuantity = new Array();
+        $('.shoppinglists-itemList > .listPageHeader-short').each(function () {
+            $(this).find('.shoppinglists-itemList-item .thumbSelect .chk').each(function () {
+                if ($(this).is(':checked')) {
+                    var quantity = $(this).closest('.row').find('.data-qty').val();
+                    if (quantity !== "0") {
+                        productsQuantity.push(quantity);
+                    } else {
+                        productsQuantity.push(1);
+                    }
+                }
+            });
+        });
+        if (productsList === undefined || productsList.length == 0) {
+            productsList = [''];
+        }
+        if (productsQuantity === undefined || productsQuantity.length == 0) {
+            productsQuantity = [''];
+        }
+        $.ajax({
+            type: "POST",
+            url: ACC.config.encodedContextPath + '/my-account/addProductsToTrolley',
+            data: {
+                'productsList': productsList, 'productsQuantity': productsQuantity
+            },
+            beforeSend: function () {
+                ACC.common.showLoadingSpinner(".add-to-trolley");
+            },
+            success: function (data) {
+                var jsonResponseData = JSON.parse(data);
+                var uniqueProductCount = jsonResponseData.uniqueProductsAdded;
+                var emptyHTML = false;
+                var html = "";
+                if (jsonResponseData.cartValidationPopUpHtml == "") {
+                    emptyHTML = true;
+                } else {
+                    html = jsonResponseData.cartValidationPopUpHtml;
+                }
+                if (uniqueProductCount > 0 && emptyHTML) {
+                    var productCount = $('.pd-Added').attr('data-added-count', uniqueProductCount);
+                    html = $('.productAddedToTrolleyPopUp').html();
+					if(ACC.global.isMobileMode()) {
+                        $.colorbox({
+                            html: html,
+                            width: '96%',
+                            left: 0,
+                            maxWidth: 700
+                        });
+                    } else{
+                        $.colorbox({
+                            html: html,
+                            width: '96%',
+                            maxWidth: 700
+                        });
+                    }
+                } else {
+                    ACC.shoppinglist.showProductPopUp(html, true);
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            },
+            complete: function () {
+                ACC.common.hideLoadingSpinner(".add-to-trolley");
+            }
+        });
+    },
+
+    setupOrderConfirmationSubscriptionActiveBlock: function () {
+        if ($(".js-order-confirmation-component").data("subscriptionFrequency") == "once-off") {
+            $(".js-subscriptionConfirmationActiveBlock").css("display", "none");
+        } else {
+            $(".js-subscriptionConfirmationActiveBlock").css("display", "block");
+        }
+    },
+
+    cancelOrderMethod: function (orderCode, orderCancelUrl) {
+        $.confirmation({
+            title: "ARE YOU SURE YOU WOULD LIKE TO CANCEL THIS ORDER?",
+            message: $(".js-cancel-order-confirm-cancellation-text").val(),
+            button1: {
+                text: "YES",
+                action: function () {
+                    $.ajax({
+                        url: orderCancelUrl,
+                        cache: false,
+                        type: 'POST',
+                        success: function (jsonData) {
+                            if (jsonData.statusCode == 'success') {
+                                ACC.toaster.reloadAndShowToaster("info", "Your order has been successfully cancelled.");
+                            } else {
+                                var errorMessage = "An error has occurred. Your order was not cancelled, retry in a few minutes.";
+                                $.toaster({
+                                    message: errorMessage,
+                                    priority: 'pnp-danger'
+                                });
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            var errorMessage = "An error has occurred. Your order was not cancelled, retry in a few minutes.";
+                            $.toaster({
+                                message: errorMessage,
+                                priority: 'pnp-danger',
+                                logMessage: errorMessage + " Error details [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                            });
+                        }
+                    });
+                }
+            },
+            button2: {
+                text: "NO",
+                action: function () {
+                }
+            }
+        });
+    },
+
+    cancelOrder: function () {
+        $(".js-cancel-order").on("click", function () {
+
+            var orderCode = $(this).data("order-code");
+            var orderCancelUrl = $(this).data("orderCancelUrl");
+
+            ACC.order.cancelOrderMethod(orderCode, orderCancelUrl);
+        });
+    },
+
+    pauseSubscription: function () {
+        $(".js-pause-subscription").on("click", function () {
+
+            var title = $(this).data("pauseSubscriptionConfirmTitleText");
+            var paragraph = $(this).data("pauseSubscriptionConfirmParagraphText");
+            var pauseSubscriptionUrl = $(this).data("pauseSubscriptionUrl");
+
+            $.confirmation({
+                title: title,
+                message: paragraph,
+                button1: {
+                    text: "YES",
+                    action: function () {
+                        $.ajax({
+                            url: pauseSubscriptionUrl,
+                            cache: false,
+                            type: 'POST',
+                            success: function (jsonData) {
+                                if (jsonData.statusCode == 'success') {
+                                    ACC.toaster.reloadAndShowToaster("info", jsonData.toastMessage);
+                                } else if (jsonData.statusCode == 'warning') {
+                                    ACC.toaster.reloadAndShowToaster("warn", jsonData.toastMessage);
+                                } else {
+                                    $.toaster({
+                                        message: jsonData.toastMessage,
+                                        priority: 'pnp-danger' //different priority setting syntax, this is the straight jquery toaster call, the earlier calls are the ACC.toaster implementation.
+                                    });
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log("Error message: ", xhr.responseText);
+                                $.toaster({
+                                    message: "An error occurred while pausing your subscription.",
+                                    priority: 'pnp-danger',
+                                    logMessage: "Error details [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                                });
+                            }
+                        });
+                    }
+                },
+                button2: {
+                    text: "NO",
+                    action: function () {
+                        //close pop up
+                    }
+                }
+            });
+        });
+    },
+
+    unpauseSubscription: function () {
+        $(".js-unpause-subscription").on("click", function () {
+            var title = $(this).data("unpauseSubscriptionConfirmTitleText");
+            var paragraph = $(this).data("unpauseSubscriptionConfirmParagraphText").replace("{0}", $(this).data("unpauseNextUpcomingDeliveryMessageText"));
+            var unpauseSubscriptionUrl = $(this).data("unpauseSubscriptionUrl");
+
+            $.confirmation({
+                title: title,
+                message: paragraph,
+                button1: {
+                    text: "YES",
+                    action: function () {
+                        $.ajax({
+                            url: unpauseSubscriptionUrl,
+                            cache: false,
+                            type: "POST",
+                            success: function (jsonData) {
+                                if (jsonData.statusCode == "success") {
+                                    ACC.toaster.reloadAndShowToaster("info", jsonData.toastMessage);
+                                } else {
+                                    $.toaster({
+                                        message: jsonData.toastMessage,
+                                        priority: "pnp-danger"
+                                    });
+                                }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log("Unpause Subscription Error Message: " + xhr.responseText);
+                                $.toaster({
+                                    message: "An error occurred while restarting your subscription.",
+                                    priority: "pnp-danger",
+                                    logMessage: "Error details: [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                                });
+                            }
+                        })
+                    }
+                },
+                button2: {
+                    text: "NO",
+                    action: function () {
+                        //close dialog without any action when user selects no.
+                    }
+                }
+            });
+        });
+    },
+	showToasts: function() {
+		$(".toaster").each(function(index, form){
+
+			var args = {};
+			$(form.elements).each(function(index, el) {
+				args[el.name] = el.value;
+			});
+
+			$.toaster(args);
+		});
+	}
+};

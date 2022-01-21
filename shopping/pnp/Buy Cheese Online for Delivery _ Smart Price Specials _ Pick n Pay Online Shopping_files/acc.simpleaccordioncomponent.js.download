@@ -1,0 +1,29 @@
+/**
+ * Created by MichaelJacobs on 2017/06/19.
+ */
+ACC.simpleaccordioncomponent = {
+    _autoload: [
+        ["expandOrCollapse", $(".pnp-accordion").length > 0]
+    ],
+    expandOrCollapse : function () {
+        /*$(document).on('click ', '.pnp-accordion', function(e) {*/
+        $('.pnp-accordion').on('click ', function(e) {
+
+            var $theAccordion = $(this).closest('.pnp-accordion');
+            var sacUid = $theAccordion.data('sacUid');
+            var active = $theAccordion.data('active');
+
+            if (sacUid) {
+                if (active == true) {
+                    $('#' + sacUid + '_pnp-accordion-panel').hide(100);
+                    $theAccordion.removeClass('active');
+                    $theAccordion.data('active', false);
+                } else {
+                    $('#' + sacUid + '_pnp-accordion-panel').show(150);
+                    $theAccordion.addClass('active');
+                    $theAccordion.data('active', true);
+                }
+            }
+        });
+    }
+}

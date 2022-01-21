@@ -1,0 +1,252 @@
+/**
+ * Created by MichaelJacobs on 7/27/2016.
+ */
+ACC.voucherlist = {
+    _autoload: [
+        ["bindVoucherOperations", $("#accountvoucherlistcomponent").length > 0]
+    ],
+    spinner: $("<img src='" + ACC.config.commonResourcePath + "/images/spinner.gif' />"),
+    bindVoucherOperations: function(){
+        ACC.voucherlist.voucherSelectionOperation();
+        ACC.voucherlist.voucherDeselectionOperation();
+        ACC.voucherlist.voucherSelectAllOperation();
+        ACC.voucherlist.voucherDeselectAllOperation();
+    },
+    voucherSelectionOperation: function () {
+        $("button[id^='btnSelectVoucher']").click(function () {
+            ACC.voucherlist.executeVoucherUpdate(ACC.config.contextPath + "/loyalty/selectvoucherforuseinstore", $(this).data("vouchernumber"), "select", "An error occurred while selecting your voucher", "#btnSelectVoucher");
+        });
+    },
+    voucherDeselectionOperation: function () {
+        $(".js-loaded-to-card-checkbox").click(function () {
+            ACC.voucherlist.executeVoucherUpdate(ACC.config.contextPath + "/loyalty/deselectvoucherforuseinstore", $(this).data("vouchernumber"), "deselect", "An error occurred while deselecting your voucher", "#js-loaded-to-card");
+        });
+    },
+    voucherSelectAllOperation: function () {
+        $("button[id^='selectAllVouchersButton']").click(function () {
+            ACC.voucherlist.executeVouchersUpdate(ACC.config.contextPath + "/loyalty/selectallvouchers", "select", $("#js-general-error-message").val(), "#selectAllVouchersButton");
+        });
+    },
+    voucherDeselectAllOperation: function () {
+        $("button[id^='deselectAllVouchersButton']").click(function () {
+            ACC.voucherlist.executeVouchersUpdate(ACC.config.contextPath + "/loyalty/deselectallvouchers", "deselect", $("#js-general-error-message").val(), "#deselectAllVouchersButton");
+        });
+    },
+    executeVoucherUpdate: function (targetUrl, voucherNumber, operation, errorMessage, buttonName) {
+        $.ajax({
+            url: targetUrl,
+            data: {voucherNumber: voucherNumber},
+            type: "POST",
+            beforeSend: function () {
+                ACC.common.showLoadingSpinner(buttonName+"-"+voucherNumber);
+                $('#btnSelectVoucher-' + voucherNumber).addClass("disabled");
+                $('#selectAllVouchersButton').addClass("disabled");
+                $('.js-loaded-to-card-checkbox').addClass("disabled");
+                $('.ssVoucherButton').addClass("disabled");
+                $('.btn-default-productview').addClass("disabled");
+                $('.shopNowBtn').addClass("disabled");
+                $('.js-cart-item-remove').addClass("disabled");
+                $('.js-loaded-to-card-checkbox').addClass("disabledButton");
+
+            },
+            success: function (data) {
+                if (data != null && data.success === false) {
+                    console.error("Failed to execute voucher update", data);
+                    $.toaster({message: errorMessage, priority: 'danger'});
+                } else {
+                    ACC.voucherlist.updateVoucherView(voucherNumber, operation, data);
+                    if (typeof ACC.minicart.updateMiniCartItems == "function") {
+                        ACC.minicart.updateMiniCartItems();
+                    }
+                    ACC.minicart.updateMiniCartDisplay();
+                    var updateViewAfterVoucherCountRefresh = ACC.voucherlist.showOrHideVoucherSelectButtons;
+                    ACC.voucherlist.refreshVoucherCount(updateViewAfterVoucherCountRefresh, operation);
+                }
+            },
+            error: function (xht, textStatus, ex) {
+                console.error("Failed to execute voucher update", xht, textStatus, ex);
+                errorMessage = $("#js-general-error-message").val();
+                $.toaster({message: errorMessage, priority: 'pnp-danger'});
+            },
+            complete: function () {
+                $('#btnSelectVoucher-' + voucherNumber).removeClass("disabled");
+                $('#selectAllVouchersButton').removeClass("disabled");
+                $('.js-loaded-to-card-checkbox').removeClass("disabled");
+                $('.ssVoucherButton').removeClass("disabled");
+                $('.btn-default-productview').removeClass("disabled");
+                $('.shopNowBtn').removeClass("disabled");
+                $('.js-cart-item-remove').removeClass("disabled");
+                $('.js-loaded-to-card-checkbox').removeClass("disabledButton");
+                ACC.common.hideLoadingSpinner(buttonName+"-"+voucherNumber);
+            }
+        });
+    },
+    executeVouchersUpdate: function(targetUrl, operation, errorMessage, buttonName){
+        $.ajax({
+            url: targetUrl,
+            cache: false,
+            type: 'POST',
+            beforeSend: function () {
+                ACC.common.showLoadingSpinner(buttonName);
+                $(buttonName).addClass("disabled");
+                $(".ssVoucherButton").addClass("disabled");
+                $('.btn-default-productview').addClass("disabled");
+                $('.shopNowBtn').addClass("disabled");
+                $('.js-cart-item-remove').addClass("disabled");
+                $('.js-loaded-to-card-checkbox').addClass("disabledButton");
+            },
+            success: function (voucherList) {
+                ACC.voucherlist.updateViewForAllVouchers(voucherList, operation);
+                var updateViewAfterVoucherCountRefresh = ACC.voucherlist.showOrHideVoucherSelectButtons;
+                ACC.voucherlist.refreshVoucherCount(updateViewAfterVoucherCountRefresh, operation);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                var error = $("#js-general-error-message").val();
+                $.toaster({message: error, priority: 'pnp-danger'});
+            },
+            complete: function () {
+                $(buttonName).removeClass("disabled");
+                $(".ssVoucherButton").removeClass("disabled");
+                $('.btn-default-productview').removeClass("disabled");
+                $('.shopNowBtn').removeClass("disabled");
+                $('.js-cart-item-remove').removeClass("disabled");
+                $('.js-loaded-to-card-checkbox').removeClass("disabledButton");
+                ACC.common.hideLoadingSpinner(buttonName);
+            }
+        });
+    },
+    updateVoucherView: function (voucherNumber, operation, responseData) {
+
+        var showAddButton = false;
+        var showSelectButton = false;
+        var showDeselectCheckBoxDiv = false;
+        var addGreyStyleToTile = false;
+        var addGreenStyleToTile = false;
+        var updateViewAfterVoucherCountRefresh = null;
+
+        if (operation == "select") {
+            showDeselectCheckBoxDiv = true;
+            addGreenStyleToTile = true;
+            var deselectCheckBox = $("#js-loaded-to-card-" + voucherNumber + ' input[type=checkbox]');
+            deselectCheckBox.prop('checked', true);
+            if (responseData != null) {
+                if (responseData.addToCartButtonVisible == undefined) {
+                    $('#btnAddColumn-' + voucherNumber).attr('style', 'display:none');
+                } else if(responseData.addToCartButtonVisible != null && responseData.addToCartButtonVisible === true) {
+                    $('#btnAddColumn-' + voucherNumber).attr('style', 'display:block');
+                } else {
+                    $('#btnAddColumn-' + voucherNumber).attr('style', 'display:none');
+                }
+
+                if (responseData.shopNowButtonVisible == undefined) {
+                    $('#btnShopColumn-' + voucherNumber).attr('style', 'display:none');
+                } else if (responseData.shopNowButtonVisible != null && responseData.shopNowButtonVisible === true) {
+                    $('#btnShopColumn-' + voucherNumber).attr('style', 'display:block');
+                } else {
+                    $('#btnShopColumn-' + voucherNumber).attr('style', 'display:none');
+                }
+            }
+        }
+        else if (operation == "deselect") {
+            showSelectButton = true;
+            addGreyStyleToTile = true;
+            $("#selectAllVouchersButton").show();
+            $("#deselectAllVouchersButton").hide();
+            $('#btnAddColumn-' + voucherNumber).attr('style', 'display:none');
+            $('#btnShopColumn-' + voucherNumber).attr('style', 'display:none');
+        }
+        $("#btnSelectColumn-" + voucherNumber).css(ACC.voucherlist.getRowCssStyle(showSelectButton ? "block" : "none"));
+        showDeselectCheckBoxDiv ? $("#js-loaded-to-card-" + voucherNumber).show() : $("#js-loaded-to-card-" + voucherNumber).hide();
+
+        var voucherContainer = $("#ssVoucherContainer-" + voucherNumber);
+        addGreyStyleToTile ? voucherContainer.addClass("greyStyle") : voucherContainer.removeClass("greyStyle");
+        addGreenStyleToTile ? voucherContainer.addClass("greenStyle") : voucherContainer.removeClass("greenStyle");
+    },
+    updateViewForAllVouchers: function (data, selectionType) {
+        var isArray = Array.isArray(data);
+        if (isArray && data != null) {
+            for(var i=0; i< data.length; i++) {
+                ACC.voucherlist.updateVoucherView(data[i].voucherNumber, selectionType, data[i]);
+            }
+        }
+        if (typeof ACC.minicart.updateMiniCartItems == "function") {
+            ACC.minicart.updateMiniCartItems();
+        }
+        ACC.minicart.updateMiniCartDisplay();
+    },
+    refreshVoucherCount: function (callback, operation) {
+        var voucherCount;
+        $.ajax({
+            url: ACC.config.contextPath + "/loyalty/refreshvouchercount",
+            cache: false,
+            type: 'GET',
+            success: function (count) {
+                voucherCount = count;
+                $(".js-voucher-count").html(count);
+                (callback != undefined && callback != null) ? callback(count) : "";
+                ACC.voucherlist.updateVoucherCountStyle(count);
+                ACC.loyalty.updateLoyaltyValues();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                var error = "Failed to refresh voucher count";
+                $.toaster({
+                    message: error,
+                    priority: 'danger',
+                    logMessage: error + " Error details [" + xhr + ", " + ajaxOptions + ", " + thrownError + "]"
+                });
+            },
+            complete: function () {
+                ACC.voucherlist.showVoucherOperationSuccessMessage(operation, voucherCount);
+            }
+        });
+    },
+    getRowCssStyle: function (display) {
+        return {
+            display: display
+        };
+    },
+    showOrHideVoucherSelectButtons: function (vouchersSelectedCount) {
+        var numberOfVouchers = $("#js-number-of-vouchers-count").val();
+        if (numberOfVouchers == vouchersSelectedCount) {
+            $("#selectAllVouchersButton").hide();
+            $("#deselectAllVouchersButton").show();
+        } else {
+            $("#selectAllVouchersButton").show();
+            $("#deselectAllVouchersButton").hide();
+        }
+    },
+    updateVoucherCountStyle: function (vouchersSelectedCount) {
+        if (vouchersSelectedCount > 0) {
+            $(".js-selected-vouchers-count").addClass("greenStyle");
+            $(".js-selected-vouchers-count").removeClass("greyStyle");
+        } else {
+            $(".js-selected-vouchers-count").removeClass("greenStyle");
+            $(".js-selected-vouchers-count").addClass("greyStyle");
+        }
+    },
+    showVoucherOperationSuccessMessage: function(operation, count){
+        if (operation == "select") {
+            ACC.voucherlist.showVoucherSelectionMessage(count);
+        } else {
+            ACC.voucherlist.showVoucherDeselectionMessage(count);
+        }
+    },
+    showVoucherSelectionMessage: function (vouchersSelectedCount) {
+        if (vouchersSelectedCount > 1) {
+            var error = $("#js-toast-success-message").val();
+            $.toaster({message: error, priority: 'pnp-success'});
+        } else {
+            var singleError = $("#js-toast-single-success-message").val();
+            $.toaster({message: singleError, priority: 'pnp-success'});
+        }
+    },
+    showVoucherDeselectionMessage: function (vouchersSelectedCount) {
+        if (vouchersSelectedCount > 0) {
+            var error = $("#js-toast-single-remove-success-message").val();
+            $.toaster({message: error, priority: 'pnp-success'});
+        } else {
+            var singleError = $("#js-toast-remove-success-message").val();
+            $.toaster({message: singleError, priority: 'pnp-success'});
+        }
+    }
+};
