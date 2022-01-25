@@ -16,9 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users import views as user_views
+from sort import views as sort_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', user_views.register, name='register'),
+    path('sort/', sort_views.sort, name='sort-data'),
     path('', include('explore.urls')),
 ]

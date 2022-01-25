@@ -1,0 +1,174 @@
+{% extends 'sort/base.html' %}
+
+{% block content %}
+  <div id="compare-box">
+    <div id="product-compare">
+      <div id="left-compare">
+        <div class="product"> 
+          <div class="prod-img">
+            <img src="https://picsum.photos/300/275">
+	  </div>
+	</div>
+        <div class="product-info">
+	  <div class="filter">
+            <div id="category-data">
+              <b>Category:</b>    Promotions
+	    </div>
+	  </div>
+
+          <div class="filter">
+            <div id="certifications-data">
+	      <b>Certifications:</b>    Halaal
+            </div>
+          </div>
+
+          <div class="filter">
+	    <div id="free-from-data">
+	      <b>Free From:</b>    Gluten Free
+            </div>
+          </div>
+
+	  <div class="filter">
+            <div id="lifestyle-data">
+	      <b>Lifestyle:</b>    Vegetarian
+            </div>
+          </div>
+
+          <div class="filter">
+            <div id="brands-data">
+	      <b>Brands:</b>    Woolies Brand
+	    </div>
+	  </div>
+
+          <div class="filter">
+	    <div id="dietary-data">
+	      <b>Dietary:</b>    Low Fat, Reduced Fat and Lean
+	    </div>
+	  </div>
+
+	  <div class="filter">
+	    <div id="range-data">
+	      <b>Range:</b>    Earth Friendly
+	    </div>
+	  </div>
+
+	  <div class="filter">
+	    <div id="rating-data">
+	      <b>Rating:</b>    4.3 Stars
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+
+      <div id="right-compare">
+        <div class="product">
+          <label onclick="contract()">
+            <input type="checkbox">
+              <div class="prod-img">
+                <img src="https://picsum.photos/300/275">
+	      </div>
+	  </label>
+	</div>
+	<div class="product-info">
+	  <div class="filter">
+            <div id="category" onclick="drop(this)">Category</div>
+	    <div id="category-ops">
+	      <div id="category-search">                                        <input type="search" placeholder="search" id="search-bx" name="searchitem" onkeyup="suggest(this)"/>
+            </div>
+	      <span>Promotions</span>
+	      <span>Milk, Dairy & Eggs</span>
+	      <span>Fruit, Vegetables & Salads</span>
+	      <span>Meat, Poultry & Fish</span>
+	      <span>Ready Meals</span>
+	      <span>Deli & Entertaining</span>
+	      <span>Food To Go</span>
+	      <span>Food Cupboard</span>
+	      <span>Wine & Bubbles</span>
+	      <span>Beverages & Juices</span>
+	      <span>Kids & Baby</span>
+	      <span>Toiletries & Health</span>
+	      <span>Household & Cleaning</span>
+	      <span>Pets</span>
+	      <span>Foodie Gifts</span>
+	      <span>Summer Wellbeing</span>
+	      <span>Braai Shop</span>
+	      <span>Plant-Based Shop</span>
+	      <span>Shop by Preference</span>
+	   </div>
+	  </div>
+
+	  <div class="filter">
+	    <div id="certifications" onclick="drop(this)">Certifications</div>
+	    <div id="certifications-ops">
+	      <span>Halaal</span>
+	      <span>Kosher</span>
+	    </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="free-from" onclick="drop(this)">Free From</div>
+	    <div id="free-from-ops">
+              <span>Fat Free</span>
+	      <span>Gluten Free</span>
+	    </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="lifestyle" onclick="drop(this)">Lifestyle</div>
+	    <div id="lifestyle-ops">
+	      <span>Vegetarian</span>
+	      <span>Vitality</span>
+	      <span>Vegan</span>
+	      <span>Free Range</span>
+	      <span>Low Alcohol</span>
+	    </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="brands" onclick="drop(this)">Brands</div>
+	    <div id="brands-ops">
+              <span>Woolies Brand</span>
+	    </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="dietary" onclick="drop(this)">Dietary</div>
+	    <div id="dietary-ops">
+	      <span>Full Cream</span>
+	      <span>Low Fat, Reduced Fat and Lean</span>
+	      <span>kJ Controlled</span>
+            </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="range" onclick="drop(this)">Range</div>
+	    <div id="range-ops">
+	      <span>Fresh Pet</span>
+	      <span>Earth Friendly</span>
+	      <span>W.Lab</span>
+	      <span>kJ Controlled™</span>
+	      <span>Wooliesbabes</span>
+	      <span>Easy to Cook</span>
+	    </div>
+	  </div>
+
+	  <div class="filter">
+            <div id="rating" onclick="drop(this)">Rating</div>
+	    <div id="rating-ops">
+	      <span>5 Stars</span>
+	      <span>4 Stars & Up</span>
+	      <span>3 Stars & Up</span>
+	      <span>2 Stars & Up</span>
+	      <span>1 Stars & Up</span>
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+
+    </div>
+    <div id="next"></div>
+  </div> 
+{% endblock %}
+
